@@ -1,0 +1,3 @@
+debian/tmp/usr/lib/libmce-glib.so usr/lib
+include/*.h usr/include/libmce-glib
+build/libmce-glib.pc usr/lib/pkgconfig

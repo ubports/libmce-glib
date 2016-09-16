@@ -1,0 +1,18 @@
+Source: libmce-glib
+Section: libs
+Priority: optional
+Maintainer: Slava Monich <slava.monich@jolla.com>
+Build-Depends: debhelper (>= 7), libglib2.0-dev (>= 2.0), libglibutil-dev
+Standards-Version: 3.8.4
+
+Package: libmce-glib
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Client library for mce
+
+Package: libmce-glib-dev
+Section: libdevel
+Architecture: any
+Depends: libmce-glib (= ${binary:Version}), ${misc:Depends}
+Description: Development files for libmce-glib
