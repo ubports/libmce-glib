@@ -39,7 +39,8 @@ LIB = $(LIB_SONAME).$(VERSION_MINOR).$(VERSION_RELEASE)
 
 SRC = \
   mce_display.c \
-  mce_proxy.c
+  mce_proxy.c \
+  mce_tklock.c
 GEN_SRC = \
   com.nokia.mce.request.c \
   com.nokia.mce.signal.c
