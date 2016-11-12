@@ -41,7 +41,8 @@ SRC = \
   mce_display.c \
   mce_proxy.c
 GEN_SRC = \
-  com.nokia.mce.c
+  com.nokia.mce.request.c \
+  com.nokia.mce.signal.c
 
 #
 # Directories

@@ -38,10 +38,12 @@
 #include "mce_proxy.h"
 #include "mce_log_p.h"
 
+#include "mce/dbus-names.h"
 #include "mce/mode-names.h"
 
 /* Generated headers */
-#include "com.nokia.mce.h"
+#include "com.nokia.mce.request.h"
+#include "com.nokia.mce.signal.h"
 
 struct mce_display_priv {
     MceProxy* proxy;
@@ -251,7 +253,7 @@ mce_display_init(
     priv->proxy_valid_id = mce_proxy_add_valid_changed_handler(priv->proxy,
         mce_display_valid_changed, self);
     priv->display_status_ind_id = g_signal_connect(priv->proxy->signal,
-        "display_status_ind", G_CALLBACK(mce_display_status_ind), self);
+        MCE_DISPLAY_SIG, G_CALLBACK(mce_display_status_ind), self);
 }
 
 static

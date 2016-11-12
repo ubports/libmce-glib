@@ -40,7 +40,8 @@
 #include "mce/dbus-names.h"
 
 /* Generated headers */
-#include "com.nokia.mce.h"
+#include "com.nokia.mce.request.h"
+#include "com.nokia.mce.signal.h"
 
 GLOG_MODULE_DEFINE("mce");
 
