@@ -280,6 +280,8 @@ mce_display_finalize(
     MceDisplay* self = MCE_DISPLAY(object);
     MceDisplayPriv* priv = self->priv;
 
+    g_signal_handler_disconnect(priv->proxy->signal,
+        priv->display_status_ind_id);
     mce_proxy_unref(priv->proxy);
     G_OBJECT_CLASS(PARENT_CLASS)->finalize(object);
 }
