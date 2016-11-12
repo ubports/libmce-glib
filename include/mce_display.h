@@ -90,6 +90,12 @@ mce_display_remove_handler(
     MceDisplay* display,
     gulong id);
 
+void
+mce_display_remove_handlers(
+    MceDisplay* display,
+    gulong *ids,
+    guint count);
+
 G_END_DECLS
 
 #endif /* MCE_DISPLAY_H */

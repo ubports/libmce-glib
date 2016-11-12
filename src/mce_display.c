@@ -38,8 +38,10 @@
 #include "mce_proxy.h"
 #include "mce_log_p.h"
 
-#include "mce/dbus-names.h"
-#include "mce/mode-names.h"
+#include <mce/dbus-names.h>
+#include <mce/mode-names.h>
+
+#include <gutil_misc.h>
 
 /* Generated headers */
 #include "com.nokia.mce.request.h"
@@ -117,6 +119,12 @@ mce_display_status_query_done(
         mce_display_status_update(self, status);
         g_free(status);
     } else {
+        /*
+         * We could retry but it's probably not worth the trouble
+         * because the next time display state changes we receive
+         * display_status_ind signal and sync our state with mce.
+         * Until then, this object stays invalid.
+         */
         GWARN("Failed to query display state %s", GERRMSG(error));
         g_error_free(error);
     }
@@ -153,7 +161,6 @@ mce_display_valid_changed(
         }
     }
 }
-
 
 static
 void
@@ -234,6 +241,15 @@ mce_display_remove_handler(
     if (G_LIKELY(self) && G_LIKELY(id)) {
         g_signal_handler_disconnect(self, id);
     }
+}
+
+void
+mce_display_remove_handlers(
+    MceDisplay* self,
+    gulong *ids,
+    guint count)
+{
+    gutil_disconnect_handlers(self, ids, count);
 }
 
 /*==========================================================================*
