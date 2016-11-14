@@ -34,71 +34,82 @@
  * any official policies, either expressed or implied.
  */
 
-#ifndef MCE_DISPLAY_H
-#define MCE_DISPLAY_H
+#ifndef MCE_TKLOCK_H
+#define MCE_TKLOCK_H
 
 #include "mce_types.h"
 
 G_BEGIN_DECLS
 
-typedef enum mce_display_state {
-    MCE_DISPLAY_STATE_OFF,
-    MCE_DISPLAY_STATE_DIM,
-    MCE_DISPLAY_STATE_ON
-} MCE_DISPLAY_STATE;
+typedef enum mce_tklock_mode {
+    MCE_TKLOCK_MODE_LOCKED,
+    MCE_TKLOCK_MODE_SILENT_LOCKED,
+    MCE_TKLOCK_MODE_LOCKED_DIM,
+    MCE_TKLOCK_MODE_LOCKED_DELAY,
+    MCE_TKLOCK_MODE_SILENT_LOCKED_DIM,
+    MCE_TKLOCK_MODE_UNLOCKED,
+    MCE_TKLOCK_MODE_SILENT_UNLOCKED
+} MCE_TKLOCK_MODE;
 
-typedef struct mce_display_priv MceDisplayPriv;
+typedef struct mce_tklock_priv MceTklockPriv;
 
-typedef struct mce_display {
+typedef struct mce_tklock {
     GObject object;
-    MceDisplayPriv* priv;
+    MceTklockPriv* priv;
     gboolean valid;
-    MCE_DISPLAY_STATE state;
-} MceDisplay;
+    MCE_TKLOCK_MODE mode;
+    gboolean locked;
+} MceTklock;
 
 typedef void
-(*MceDisplayFunc)(
-    MceDisplay* display,
+(*MceTklockFunc)(
+    MceTklock* tklock,
     void* arg);
 
-MceDisplay*
-mce_display_new(
+MceTklock*
+mce_tklock_new(
     void);
 
-MceDisplay*
-mce_display_ref(
-    MceDisplay* display);
+MceTklock*
+mce_tklock_ref(
+    MceTklock* tklock);
 
 void
-mce_display_unref(
-    MceDisplay* display);
+mce_tklock_unref(
+    MceTklock* tklock);
 
 gulong
-mce_display_add_valid_changed_handler(
-    MceDisplay* display,
-    MceDisplayFunc fn,
+mce_tklock_add_valid_changed_handler(
+    MceTklock* tklock,
+    MceTklockFunc fn,
     void* arg);
 
 gulong
-mce_display_add_state_changed_handler(
-    MceDisplay* display,
-    MceDisplayFunc fn,
+mce_tklock_add_mode_changed_handler(
+    MceTklock* tklock,
+    MceTklockFunc fn,
+    void* arg);
+
+gulong
+mce_tklock_add_locked_changed_handler(
+    MceTklock* tklock,
+    MceTklockFunc fn,
     void* arg);
 
 void
-mce_display_remove_handler(
-    MceDisplay* display,
+mce_tklock_remove_handler(
+    MceTklock* tklock,
     gulong id);
 
 void
-mce_display_remove_handlers(
-    MceDisplay* display,
+mce_tklock_remove_handlers(
+    MceTklock* tklock,
     gulong *ids,
     guint count);
 
 G_END_DECLS
 
-#endif /* MCE_DISPLAY_H */
+#endif /* MCE_TKLOCK_H */
 
 /*
  * Local Variables:

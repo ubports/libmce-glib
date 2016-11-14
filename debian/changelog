@@ -1,3 +1,10 @@
+libmce-glib (1.0.2) unstable; urgency=low
+
+  * Added mce_display_remove_handlers
+  * Added mce_tklock object
+
+ -- Slava Monich <slava.monich@jolla.com>  Sat, 12 Nov 2016 13:26:09 +0300
+
 libmce-glib (1.0.1) unstable; urgency=low
 
   * Pull mce headers from mce-dev

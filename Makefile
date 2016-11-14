@@ -20,7 +20,7 @@ all: debug release pkgconfig
 
 VERSION_MAJOR = 1
 VERSION_MINOR = 0
-VERSION_RELEASE = 1
+VERSION_RELEASE = 2
 
 # Version for pkg-config
 PCVERSION = $(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_RELEASE)
@@ -39,9 +39,11 @@ LIB = $(LIB_SONAME).$(VERSION_MINOR).$(VERSION_RELEASE)
 
 SRC = \
   mce_display.c \
-  mce_proxy.c
+  mce_proxy.c \
+  mce_tklock.c
 GEN_SRC = \
-  com.nokia.mce.c
+  com.nokia.mce.request.c \
+  com.nokia.mce.signal.c
 
 #
 # Directories

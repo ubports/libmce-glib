@@ -38,10 +38,14 @@
 #include "mce_proxy.h"
 #include "mce_log_p.h"
 
-#include "mce/mode-names.h"
+#include <mce/dbus-names.h>
+#include <mce/mode-names.h>
+
+#include <gutil_misc.h>
 
 /* Generated headers */
-#include "com.nokia.mce.h"
+#include "com.nokia.mce.request.h"
+#include "com.nokia.mce.signal.h"
 
 struct mce_display_priv {
     MceProxy* proxy;
@@ -115,6 +119,12 @@ mce_display_status_query_done(
         mce_display_status_update(self, status);
         g_free(status);
     } else {
+        /*
+         * We could retry but it's probably not worth the trouble
+         * because the next time display state changes we receive
+         * display_status_ind signal and sync our state with mce.
+         * Until then, this object stays invalid.
+         */
         GWARN("Failed to query display state %s", GERRMSG(error));
         g_error_free(error);
     }
@@ -151,7 +161,6 @@ mce_display_valid_changed(
         }
     }
 }
-
 
 static
 void
@@ -234,6 +243,15 @@ mce_display_remove_handler(
     }
 }
 
+void
+mce_display_remove_handlers(
+    MceDisplay* self,
+    gulong *ids,
+    guint count)
+{
+    gutil_disconnect_handlers(self, ids, count);
+}
+
 /*==========================================================================*
  * Internals
  *==========================================================================*/
@@ -251,7 +269,7 @@ mce_display_init(
     priv->proxy_valid_id = mce_proxy_add_valid_changed_handler(priv->proxy,
         mce_display_valid_changed, self);
     priv->display_status_ind_id = g_signal_connect(priv->proxy->signal,
-        "display_status_ind", G_CALLBACK(mce_display_status_ind), self);
+        MCE_DISPLAY_SIG, G_CALLBACK(mce_display_status_ind), self);
 }
 
 static
@@ -262,6 +280,8 @@ mce_display_finalize(
     MceDisplay* self = MCE_DISPLAY(object);
     MceDisplayPriv* priv = self->priv;
 
+    g_signal_handler_disconnect(priv->proxy->signal,
+        priv->display_status_ind_id);
     mce_proxy_unref(priv->proxy);
     G_OBJECT_CLASS(PARENT_CLASS)->finalize(object);
 }

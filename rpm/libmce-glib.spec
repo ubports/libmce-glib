@@ -1,5 +1,5 @@
 Name: libmce-glib
-Version: 1.0.1
+Version: 1.0.2
 Release: 0
 Summary: MCE client library
 Group: Development/Libraries
@@ -9,6 +9,7 @@ Source: %{name}-%{version}.tar.bz2
 BuildRequires:  pkgconfig(glib-2.0)
 BuildRequires:  pkgconfig(libglibutil)
 BuildRequires:  pkgconfig(mce)
+Requires: libglibutil >= 1.0.5
 Requires(post): /sbin/ldconfig
 Requires(postun): /sbin/ldconfig
 

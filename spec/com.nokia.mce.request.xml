@@ -2,17 +2,13 @@
 <!DOCTYPE node PUBLIC
   "-//freedesktop//DTD D-Bus Object Introspection 1.0//EN"
   "http://standards.freedesktop.org/dbus/1.0/introspect.dtd">
-<node name="/com/nokia/mce/signal">
-  <!-- com.nokia.mce.request -->
+<node name="/com/nokia/mce/request">
   <interface name="com.nokia.mce.request">
     <method name="get_display_status">
       <arg direction="out" name="display_state" type="s"/>
     </method>
-  </interface>
-  <!-- com.nokia.mce.signal -->
-  <interface name="com.nokia.mce.signal">
-    <signal name="display_status_ind">
-      <arg name="display_state" type="s"/>
-    </signal>
+    <method name="get_tklock_mode">
+      <arg direction="out" name="mode_name" type="s"/>
+    </method>
   </interface>
 </node>
