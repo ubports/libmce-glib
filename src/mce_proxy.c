@@ -75,6 +75,7 @@ mce_name_appeared(
     gpointer arg)
 {
     MceProxy* self = MCE_PROXY(arg);
+
     GDEBUG("Name '%s' is owned by %s", name, owner);
     GASSERT(!self->valid);
     self->valid = TRUE;
@@ -89,11 +90,98 @@ mce_name_vanished(
     gpointer arg)
 {
     MceProxy* self = MCE_PROXY(arg);
+
     GDEBUG("Name '%s' has disappeared", name);
     if (self->valid) {
         self->valid = FALSE;
         g_signal_emit(self, mce_proxy_signals[SIGNAL_VALID_CHANGED], 0);
     }
+}
+
+static
+void
+mce_proxy_init_check(
+    MceProxy* self)
+{
+    MceProxyPriv* priv = self->priv;
+
+    if (self->signal && self->request && !priv->mce_watch_id) {
+        priv->mce_watch_id = g_bus_watch_name_on_connection(priv->bus,
+            MCE_SERVICE, G_BUS_NAME_WATCHER_FLAGS_NONE,
+            mce_name_appeared, mce_name_vanished, self, NULL);
+    }
+}
+
+static
+void
+mce_proxy_request_proxy_new_finished(
+    GObject* object,
+    GAsyncResult* result,
+    gpointer arg)
+{
+    MceProxy* self = MCE_PROXY(arg);
+    GError* error = NULL;
+
+    GASSERT(!self->request);
+    self->request = com_nokia_mce_request_proxy_new_finish(result, &error);
+    if (self->request) {
+        mce_proxy_init_check(self);
+    } else {
+        GERR("Failed to initialize MCE request proxy: %s", GERRMSG(error));
+        g_error_free(error);
+    }
+    mce_proxy_unref(self);
+}
+
+static
+void
+mce_proxy_signal_proxy_new_finished(
+    GObject* object,
+    GAsyncResult* result,
+    gpointer arg)
+{
+    MceProxy* self = MCE_PROXY(arg);
+    GError* error = NULL;
+
+    GASSERT(!self->signal);
+    self->signal = com_nokia_mce_signal_proxy_new_finish(result, &error);
+    if (self->signal) {
+        mce_proxy_init_check(self);
+    } else {
+        GERR("Failed to initialize MCE signal proxy: %s", GERRMSG(error));
+        g_error_free(error);
+    }
+    mce_proxy_unref(self);
+}
+
+static
+void
+mce_proxy_bus_get_finished(
+    GObject* object,
+    GAsyncResult* result,
+    gpointer arg)
+{
+    MceProxy* self = MCE_PROXY(arg);
+    MceProxyPriv* priv = self->priv;
+    GError* error = NULL;
+
+    priv->bus = g_bus_get_finish(result, &error);
+    if (priv->bus) {
+        com_nokia_mce_request_proxy_new(priv->bus,
+            G_DBUS_PROXY_FLAGS_DO_NOT_LOAD_PROPERTIES,
+            MCE_SERVICE, MCE_REQUEST_PATH, NULL,
+            mce_proxy_request_proxy_new_finished,
+            mce_proxy_ref(self));
+        com_nokia_mce_signal_proxy_new(priv->bus,
+            G_DBUS_PROXY_FLAGS_DO_NOT_LOAD_PROPERTIES,
+            MCE_SERVICE, MCE_SIGNAL_PATH, NULL,
+            mce_proxy_signal_proxy_new_finished,
+            mce_proxy_ref(self));
+    } else {
+        GERR("Failed to attach to system bus: %s", GERRMSG(error));
+        g_error_free(error);
+    }
+    mce_proxy_unref(self);
 }
 
 MceProxy*
@@ -108,6 +196,8 @@ mce_proxy_new()
         mce_proxy_ref(mce_proxy_instance);
     } else {
         mce_proxy_instance = g_object_new(MCE_PROXY_TYPE, NULL);
+        g_bus_get(G_BUS_TYPE_SYSTEM, NULL, mce_proxy_bus_get_finished,
+            mce_proxy_ref(mce_proxy_instance));
         g_object_add_weak_pointer(G_OBJECT(mce_proxy_instance),
             (gpointer*)(&mce_proxy_instance));
     }
@@ -158,17 +248,8 @@ void
 mce_proxy_init(
     MceProxy* self)
 {
-    MceProxyPriv* priv = G_TYPE_INSTANCE_GET_PRIVATE(self, MCE_PROXY_TYPE,
-        MceProxyPriv);
-    self->priv = priv;
-    priv->bus = g_bus_get_sync(G_BUS_TYPE_SYSTEM, NULL, NULL);
-    self->signal = com_nokia_mce_signal_proxy_new_sync(priv->bus,
-        G_DBUS_PROXY_FLAGS_NONE, MCE_SERVICE, MCE_SIGNAL_PATH, NULL, NULL);
-    self->request = com_nokia_mce_request_proxy_new_sync(priv->bus,
-        G_DBUS_PROXY_FLAGS_NONE, MCE_SERVICE, MCE_REQUEST_PATH, NULL, NULL);
-    priv->mce_watch_id = g_bus_watch_name_on_connection(priv->bus,
-        MCE_SERVICE, G_BUS_NAME_WATCHER_FLAGS_NONE,
-        mce_name_appeared, mce_name_vanished, self, NULL);
+    self->priv = G_TYPE_INSTANCE_GET_PRIVATE(self,
+        MCE_PROXY_TYPE, MceProxyPriv);
 }
 
 static
@@ -178,10 +259,19 @@ mce_proxy_finalize(
 {
     MceProxy* self = MCE_PROXY(object);
     MceProxyPriv* priv = self->priv;
-    g_bus_unwatch_name(priv->mce_watch_id);
-    g_object_unref(self->signal);
-    g_object_unref(self->request);
-    g_object_unref(priv->bus);
+
+    if (priv->mce_watch_id) {
+        g_bus_unwatch_name(priv->mce_watch_id);
+    }
+    if (self->signal) {
+        g_object_unref(self->signal);
+    }
+    if (self->request) {
+        g_object_unref(self->request);
+    }
+    if (priv->bus) {
+        g_object_unref(priv->bus);
+    }
     G_OBJECT_CLASS(PARENT_CLASS)->finalize(object);
 }
 

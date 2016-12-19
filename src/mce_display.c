@@ -133,12 +133,34 @@ mce_display_status_query_done(
 
 static
 void
+mce_display_status_ind(
+    ComNokiaMceSignal* proxy,
+    const char* status,
+    gpointer arg)
+{
+    GDEBUG("Display is %s", status);
+    mce_display_status_update(MCE_DISPLAY(arg), status);
+}
+
+static
+void
 mce_display_status_query(
     MceDisplay* self)
 {
-    MceProxy* proxy = self->priv->proxy;
+    MceDisplayPriv* priv = self->priv;
+    MceProxy* proxy = priv->proxy;
 
-    if (proxy->valid) {
+    /*
+     * proxy->signal and proxy->request may not be available at the
+     * time when MceDisplay is created. In that case we have to wait
+     * for the valid signal before we can connect the display state
+     * signal and submit the initial query.
+     */
+    if (proxy->signal && !priv->display_status_ind_id) {
+        priv->display_status_ind_id = g_signal_connect(proxy->signal,
+            MCE_DISPLAY_SIG, G_CALLBACK(mce_display_status_ind), self);
+    }
+    if (proxy->request && proxy->valid) {
         com_nokia_mce_request_call_get_display_status(proxy->request, NULL,
             mce_display_status_query_done, mce_display_ref(self));
     }
@@ -160,17 +182,6 @@ mce_display_valid_changed(
             g_signal_emit(self, mce_display_signals[SIGNAL_VALID_CHANGED], 0);
         }
     }
-}
-
-static
-void
-mce_display_status_ind(
-    ComNokiaMceSignal* proxy,
-    const char* status,
-    gpointer arg)
-{
-    GDEBUG("Display is %s", status);
-    mce_display_status_update(MCE_DISPLAY(arg), status);
 }
 
 /*==========================================================================*
@@ -268,8 +279,6 @@ mce_display_init(
     priv->proxy = mce_proxy_new();
     priv->proxy_valid_id = mce_proxy_add_valid_changed_handler(priv->proxy,
         mce_display_valid_changed, self);
-    priv->display_status_ind_id = g_signal_connect(priv->proxy->signal,
-        MCE_DISPLAY_SIG, G_CALLBACK(mce_display_status_ind), self);
 }
 
 static
@@ -280,8 +289,11 @@ mce_display_finalize(
     MceDisplay* self = MCE_DISPLAY(object);
     MceDisplayPriv* priv = self->priv;
 
-    g_signal_handler_disconnect(priv->proxy->signal,
-        priv->display_status_ind_id);
+    if (priv->display_status_ind_id) {
+        g_signal_handler_disconnect(priv->proxy->signal,
+            priv->display_status_ind_id);
+    }
+    mce_proxy_remove_handler(priv->proxy, priv->proxy_valid_id);
     mce_proxy_unref(priv->proxy);
     G_OBJECT_CLASS(PARENT_CLASS)->finalize(object);
 }

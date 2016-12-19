@@ -155,12 +155,34 @@ mce_tklock_mode_query_done(
 
 static
 void
+mce_tklock_mode_ind(
+    ComNokiaMceSignal* proxy,
+    const char* mode,
+    gpointer arg)
+{
+    GDEBUG("Mode is %s", mode);
+    mce_tklock_mode_update(MCE_TKLOCK(arg), mode);
+}
+
+static
+void
 mce_tklock_mode_query(
     MceTklock* self)
 {
-    MceProxy* proxy = self->priv->proxy;
+    MceTklockPriv* priv = self->priv;
+    MceProxy* proxy = priv->proxy;
 
-    if (proxy->valid) {
+    /*
+     * proxy->signal and proxy->request may not be available at the
+     * time when MceTklock is created. In that case we have to wait
+     * for the valid signal before we can connect the tklock mode
+     * signal and submit the initial query.
+     */
+    if (proxy->signal && priv->proxy->signal) {
+        priv->tklock_mode_ind_id = g_signal_connect(proxy->signal,
+            MCE_TKLOCK_MODE_SIG, G_CALLBACK(mce_tklock_mode_ind), self);
+    }
+    if (proxy->request && proxy->valid) {
         com_nokia_mce_request_call_get_tklock_mode(proxy->request, NULL,
             mce_tklock_mode_query_done, mce_tklock_ref(self));
     }
@@ -182,17 +204,6 @@ mce_tklock_valid_changed(
             g_signal_emit(self, mce_tklock_signals[SIGNAL_VALID_CHANGED], 0);
         }
     }
-}
-
-static
-void
-mce_tklock_mode_ind(
-    ComNokiaMceSignal* proxy,
-    const char* mode,
-    gpointer arg)
-{
-    GDEBUG("Mode is %s", mode);
-    mce_tklock_mode_update(MCE_TKLOCK(arg), mode);
 }
 
 /*==========================================================================*
@@ -302,8 +313,6 @@ mce_tklock_init(
     priv->proxy = mce_proxy_new();
     priv->proxy_valid_id = mce_proxy_add_valid_changed_handler(priv->proxy,
         mce_tklock_valid_changed, self);
-    priv->tklock_mode_ind_id = g_signal_connect(priv->proxy->signal,
-        MCE_TKLOCK_MODE_SIG, G_CALLBACK(mce_tklock_mode_ind), self);
 }
 
 static
@@ -314,8 +323,11 @@ mce_tklock_finalize(
     MceTklock* self = MCE_TKLOCK(object);
     MceTklockPriv* priv = self->priv;
 
-    g_signal_handler_disconnect(priv->proxy->signal,
-        priv->tklock_mode_ind_id);
+    if (priv->tklock_mode_ind_id) {
+        g_signal_handler_disconnect(priv->proxy->signal,
+            priv->tklock_mode_ind_id);
+    }
+    mce_proxy_remove_handler(priv->proxy, priv->proxy_valid_id);
     mce_proxy_unref(priv->proxy);
     G_OBJECT_CLASS(PARENT_CLASS)->finalize(object);
 }
