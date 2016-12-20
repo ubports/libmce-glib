@@ -1,3 +1,9 @@
+libmce-glib (1.0.3) unstable; urgency=low
+
+  * Initialize D-Bus proxies asynchronously
+
+ -- Slava Monich <slava.monich@jolla.com>  Wed, 21 Dec 2016 00:36:00 +0200
+
 libmce-glib (1.0.2) unstable; urgency=low
 
   * Added mce_display_remove_handlers
