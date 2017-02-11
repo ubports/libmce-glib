@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Jolla Ltd.
+ * Copyright (C) 2016-2017 Jolla Ltd.
  * Contact: Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of BSD license as follows:
@@ -178,7 +178,7 @@ mce_tklock_mode_query(
      * for the valid signal before we can connect the tklock mode
      * signal and submit the initial query.
      */
-    if (proxy->signal && priv->proxy->signal) {
+    if (proxy->signal && !priv->tklock_mode_ind_id) {
         priv->tklock_mode_ind_id = g_signal_connect(proxy->signal,
             MCE_TKLOCK_MODE_SIG, G_CALLBACK(mce_tklock_mode_ind), self);
     }
