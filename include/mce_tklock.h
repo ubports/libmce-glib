@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Jolla Ltd.
+ * Copyright (C) 2016-2017 Jolla Ltd.
  * Contact: Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of BSD license as follows:
@@ -106,6 +106,9 @@ mce_tklock_remove_handlers(
     MceTklock* tklock,
     gulong *ids,
     guint count);
+
+#define mce_tklock_remove_all_handlers(t, ids) \
+	mce_tklock_remove_handlers(t, ids, G_N_ELEMENTS(ids))
 
 G_END_DECLS
 
