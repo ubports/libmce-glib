@@ -1,3 +1,9 @@
+libmce-glib (1.0.5) unstable; urgency=low
+
+  * Added remove_all_handlers macros
+
+ -- Slava Monich <slava.monich@jolla.com>  Fri, 15 Sep 2017 15:40:57 +0300
+
 libmce-glib (1.0.4) unstable; urgency=low
 
   * Fixed MceTklock initialization bug
