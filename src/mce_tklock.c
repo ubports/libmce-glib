@@ -38,14 +38,10 @@
 #include "mce_proxy.h"
 #include "mce_log_p.h"
 
-#include <mce/dbus-names.h>
-#include <mce/mode-names.h>
-
 #include <gutil_misc.h>
 
 /* Generated headers */
-#include "com.nokia.mce.request.h"
-#include "com.nokia.mce.signal.h"
+#include "com.canonical.Unity.Screen.h"
 
 struct mce_tklock_priv {
     MceProxy* proxy;
@@ -63,6 +59,16 @@ enum mce_tklock_signal {
 #define SIGNAL_VALID_CHANGED_NAME  "mce-tklock-valid-changed"
 #define SIGNAL_MODE_CHANGED_NAME   "mce-tklock-mode-changed"
 #define SIGNAL_LOCKED_CHANGED_NAME "mce-tklock-locked-changed"
+
+#define MCE_TK_LOCKED "locked"
+#define MCE_TK_UNLOCKED "unlocked"
+#define MCE_TK_SILENT_LOCKED "silent-locked"
+#define MCE_TK_LOCKED_DIM "locked-dim"
+#define MCE_TK_SILENT_LOCKED_DIM "silent-locked-dim"
+#define MCE_TK_SILENT_UNLOCKED "silent-unlocked"
+#define MCE_TK_LOCKED_DELAY "locked-delay"
+
+#define MCE_DISPLAY_SIG "displayStatusInd"
 
 static guint mce_tklock_signals[SIGNAL_COUNT] = { 0 };
 
@@ -135,8 +141,8 @@ mce_tklock_mode_query_done(
     char* status = NULL;
     MceTklock* self = MCE_TKLOCK(arg);
 
-    if (com_nokia_mce_request_call_get_tklock_mode_finish(
-        COM_NOKIA_MCE_REQUEST(proxy), &status, result, &error)) {
+    if (com_canonical_unity_screen_call_get_tklock_mode_finish(
+        COM_CANONICAL_UNITY_SCREEN(proxy), &status, result, &error)) {
         GDEBUG("Mode is currently %s", status);
         mce_tklock_mode_update(self, status);
         g_free(status);
@@ -156,7 +162,7 @@ mce_tklock_mode_query_done(
 static
 void
 mce_tklock_mode_ind(
-    ComNokiaMceSignal* proxy,
+    ComCanonicalUnityScreen* proxy,
     const char* mode,
     gpointer arg)
 {
@@ -180,10 +186,10 @@ mce_tklock_mode_query(
      */
     if (proxy->signal && !priv->tklock_mode_ind_id) {
         priv->tklock_mode_ind_id = g_signal_connect(proxy->signal,
-            MCE_TKLOCK_MODE_SIG, G_CALLBACK(mce_tklock_mode_ind), self);
+            MCE_DISPLAY_SIG, G_CALLBACK(mce_tklock_mode_ind), self);
     }
     if (proxy->request && proxy->valid) {
-        com_nokia_mce_request_call_get_tklock_mode(proxy->request, NULL,
+        com_canonical_unity_screen_call_get_tklock_mode(proxy->request, NULL,
             mce_tklock_mode_query_done, mce_tklock_ref(self));
     }
 }

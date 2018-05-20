@@ -40,15 +40,14 @@
 #include "mce_types.h"
 
 typedef struct mce_proxy_priv MceProxyPriv;
-struct _ComNokiaMceSignal;
-struct _ComNokiaMceRequest;
+struct _ComCanonicalUnityScreen;
 
 typedef struct mce_proxy {
     GObject object;
     MceProxyPriv* priv;
     gboolean valid;
-    struct _ComNokiaMceSignal* signal;
-    struct _ComNokiaMceRequest* request;
+    struct _ComCanonicalUnityScreen* signal;
+    struct _ComCanonicalUnityScreen* request;
 } MceProxy;
 
 typedef void

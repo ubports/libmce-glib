@@ -37,11 +37,8 @@
 #include "mce_proxy.h"
 #include "mce_log_p.h"
 
-#include "mce/dbus-names.h"
-
 /* Generated headers */
-#include "com.nokia.mce.request.h"
-#include "com.nokia.mce.signal.h"
+#include "com.canonical.Unity.Screen.h"
 
 GLOG_MODULE_DEFINE("mce");
 
@@ -56,6 +53,10 @@ enum mce_proxy_signal {
 };
 
 #define SIGNAL_VALID_CHANGED_NAME   "mce-proxy-valid-changed"
+
+#define MCE_SERVICE "com.canonical.Unity.Screen"
+#define MCE_REQUEST_PATH "/com/canonical/Unity/Screen"
+#define MCE_SIGNAL_PATH "/com/canonical/Unity/Screen"
 
 static guint mce_proxy_signals[SIGNAL_COUNT] = { 0 };
 

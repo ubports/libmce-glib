@@ -38,14 +38,10 @@
 #include "mce_proxy.h"
 #include "mce_log_p.h"
 
-#include <mce/dbus-names.h>
-#include <mce/mode-names.h>
-
 #include <gutil_misc.h>
 
 /* Generated headers */
-#include "com.nokia.mce.request.h"
-#include "com.nokia.mce.signal.h"
+#include "com.canonical.Unity.Screen.h"
 
 struct mce_display_priv {
     MceProxy* proxy;
@@ -61,6 +57,12 @@ enum mce_display_signal {
 
 #define SIGNAL_VALID_CHANGED_NAME   "mce-display-valid-changed"
 #define SIGNAL_STATE_CHANGED_NAME   "mce-display-state-changed"
+
+#define MCE_DISPLAY_OFF_STRING "off"
+#define MCE_DISPLAY_DIM_STRING "dim"
+#define MCE_DISPLAY_ON_STRING "on"
+
+#define MCE_DISPLAY_SIG "displayStatusInd"
 
 static guint mce_display_signals[SIGNAL_COUNT] = { 0 };
 
@@ -113,8 +115,8 @@ mce_display_status_query_done(
     char* status = NULL;
     MceDisplay* self = MCE_DISPLAY(arg);
 
-    if (com_nokia_mce_request_call_get_display_status_finish(
-        COM_NOKIA_MCE_REQUEST(proxy), &status, result, &error)) {
+    if (com_canonical_unity_screen_call_get_display_status_finish(
+        COM_CANONICAL_UNITY_SCREEN(proxy), &status, result, &error)) {
         GDEBUG("Display is currently %s", status);
         mce_display_status_update(self, status);
         g_free(status);
@@ -134,7 +136,7 @@ mce_display_status_query_done(
 static
 void
 mce_display_status_ind(
-    ComNokiaMceSignal* proxy,
+    ComCanonicalUnityScreen* proxy,
     const char* status,
     gpointer arg)
 {
@@ -161,7 +163,7 @@ mce_display_status_query(
             MCE_DISPLAY_SIG, G_CALLBACK(mce_display_status_ind), self);
     }
     if (proxy->request && proxy->valid) {
-        com_nokia_mce_request_call_get_display_status(proxy->request, NULL,
+        com_canonical_unity_screen_call_get_display_status(proxy->request, NULL,
             mce_display_status_query_done, mce_display_ref(self));
     }
 }

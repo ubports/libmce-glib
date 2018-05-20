@@ -42,8 +42,7 @@ SRC = \
   mce_proxy.c \
   mce_tklock.c
 GEN_SRC = \
-  com.nokia.mce.request.c \
-  com.nokia.mce.signal.c
+  com.canonical.Unity.Screen.c
 
 #
 # Directories
