@@ -124,7 +124,7 @@ mce_proxy_request_proxy_new_finished(
     GError* error = NULL;
 
     GASSERT(!self->request);
-    self->request = com_nokia_mce_request_proxy_new_finish(result, &error);
+    self->request = com_canonical_unity_screen_proxy_new_finish(result, &error);
     if (self->request) {
         mce_proxy_init_check(self);
     } else {
@@ -145,7 +145,7 @@ mce_proxy_signal_proxy_new_finished(
     GError* error = NULL;
 
     GASSERT(!self->signal);
-    self->signal = com_nokia_mce_signal_proxy_new_finish(result, &error);
+    self->signal = com_canonical_unity_screen_proxy_new_finish(result, &error);
     if (self->signal) {
         mce_proxy_init_check(self);
     } else {
@@ -168,12 +168,12 @@ mce_proxy_bus_get_finished(
 
     priv->bus = g_bus_get_finish(result, &error);
     if (priv->bus) {
-        com_nokia_mce_request_proxy_new(priv->bus,
+        com_canonical_unity_screen_proxy_new(priv->bus,
             G_DBUS_PROXY_FLAGS_DO_NOT_LOAD_PROPERTIES,
             MCE_SERVICE, MCE_REQUEST_PATH, NULL,
             mce_proxy_request_proxy_new_finished,
             mce_proxy_ref(self));
-        com_nokia_mce_signal_proxy_new(priv->bus,
+        com_canonical_unity_screen_proxy_new(priv->bus,
             G_DBUS_PROXY_FLAGS_DO_NOT_LOAD_PROPERTIES,
             MCE_SERVICE, MCE_SIGNAL_PATH, NULL,
             mce_proxy_signal_proxy_new_finished,
