@@ -4,11 +4,12 @@
   "http://standards.freedesktop.org/dbus/1.0/introspect.dtd">
 <node name="/com/canonical/Unity/Screen">
   <interface name="com.canonical.Unity.Screen">
-    <method name="getDisplayStatus">
-      <arg direction="out" name="displayState" type="s"/>
+    <method name="getDisplayPowerState">
+      <arg direction="out" name="displayPowerState" type="i"/>
     </method>
-    <signal name="displayStatusInd">
-      <arg name="displayState" type="s"/>
+    <signal name='DisplayPowerStateChange'>
+      <arg name='state' type='i'/>
+      <arg name='reason' type='i'/>
     </signal>
   </interface>
 </node>

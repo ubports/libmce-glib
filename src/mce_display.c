@@ -59,10 +59,9 @@ enum mce_display_signal {
 #define SIGNAL_STATE_CHANGED_NAME   "mce-display-state-changed"
 
 #define MCE_DISPLAY_OFF_STRING "off"
-#define MCE_DISPLAY_DIM_STRING "dim"
 #define MCE_DISPLAY_ON_STRING "on"
 
-#define MCE_DISPLAY_SIG "displayStatusInd"
+#define MCE_DISPLAY_SIG "DisplayPowerStateChange"
 
 static guint mce_display_signals[SIGNAL_COUNT] = { 0 };
 
@@ -81,19 +80,11 @@ static
 void
 mce_display_status_update(
     MceDisplay* self,
-    const char* status)
+    int32_t status)
 {
-    MCE_DISPLAY_STATE state;
+    MCE_DISPLAY_STATE state = status;
     MceDisplayPriv* priv = self->priv;
 
-    if (!g_strcmp0(status, MCE_DISPLAY_OFF_STRING)) {
-        state = MCE_DISPLAY_STATE_OFF;
-    } else if (!g_strcmp0(status, MCE_DISPLAY_DIM_STRING)) {
-        state = MCE_DISPLAY_STATE_DIM;
-    } else {
-        GASSERT(!g_strcmp0(status, MCE_DISPLAY_ON_STRING));
-        state = MCE_DISPLAY_STATE_ON;
-    }
     if (self->state != state) {
         self->state = state;
         g_signal_emit(self, mce_display_signals[SIGNAL_STATE_CHANGED], 0);
@@ -112,14 +103,13 @@ mce_display_status_query_done(
     gpointer arg)
 {
     GError* error = NULL;
-    char* status = NULL;
+    int32_t status = 0;
     MceDisplay* self = MCE_DISPLAY(arg);
 
-    if (com_canonical_unity_screen_call_get_display_status_finish(
+    if (com_canonical_unity_screen_call_get_display_power_state_finish(
         COM_CANONICAL_UNITY_SCREEN(proxy), &status, result, &error)) {
-        GDEBUG("Display is currently %s", status);
+        GDEBUG("Display is currently %d", status);
         mce_display_status_update(self, status);
-        g_free(status);
     } else {
         /*
          * We could retry but it's probably not worth the trouble
@@ -135,12 +125,12 @@ mce_display_status_query_done(
 
 static
 void
-mce_display_status_ind(
+mce_display_power_state_change(
     ComCanonicalUnityScreen* proxy,
-    const char* status,
+    int32_t status,
     gpointer arg)
 {
-    GDEBUG("Display is %s", status);
+    GDEBUG("Display is %d", status);
     mce_display_status_update(MCE_DISPLAY(arg), status);
 }
 
@@ -160,10 +150,10 @@ mce_display_status_query(
      */
     if (proxy->signal && !priv->display_status_ind_id) {
         priv->display_status_ind_id = g_signal_connect(proxy->signal,
-            MCE_DISPLAY_SIG, G_CALLBACK(mce_display_status_ind), self);
+            MCE_DISPLAY_SIG, G_CALLBACK(mce_display_power_state_change), self);
     }
     if (proxy->request && proxy->valid) {
-        com_canonical_unity_screen_call_get_display_status(proxy->request, NULL,
+        com_canonical_unity_screen_call_get_display_power_state(proxy->request, NULL,
             mce_display_status_query_done, mce_display_ref(self));
     }
 }

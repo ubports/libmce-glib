@@ -43,7 +43,6 @@ G_BEGIN_DECLS
 
 typedef enum mce_display_state {
     MCE_DISPLAY_STATE_OFF,
-    MCE_DISPLAY_STATE_DIM,
     MCE_DISPLAY_STATE_ON
 } MCE_DISPLAY_STATE;
 
