@@ -7,14 +7,8 @@
     <method name="getDisplayStatus">
       <arg direction="out" name="displayState" type="s"/>
     </method>
-    <method name="getTklockMode">
-      <arg direction="out" name="modeName" type="s"/>
-    </method>
     <signal name="displayStatusInd">
       <arg name="displayState" type="s"/>
-    </signal>
-    <signal name="tklockModeInd">
-      <arg name="modeName" type="s"/>
     </signal>
   </interface>
 </node>
