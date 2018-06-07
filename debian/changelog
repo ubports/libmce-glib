@@ -1,3 +1,9 @@
+libmce-glib (1.0.5+gemian) buster; urgency=low
+
+  * Branched for Gemian
+
+ -- Adam Boardman <adamboardman@gmail.com>  Thu, 7 Jun 2018 16:25:48 +0100
+
 libmce-glib (1.0.5) unstable; urgency=low
 
   * Added remove_all_handlers macros
